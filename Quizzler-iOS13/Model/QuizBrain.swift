@@ -1,21 +1,11 @@
 //
-//  ViewController.swift
-//  Quizzler-iOS13
-//
-//  Created by Angela Yu on 12/07/2019.
-//  Copyright © 2019 The App Brewery. All rights reserved.
+// Created by Thomas Strauß on 24.05.21.
+// Copyright (c) 2021 The App Brewery. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
-class ViewController: UIViewController {
-
-    @IBOutlet weak var questionTextLabel: UILabel!
-    @IBOutlet weak var answerTrueButton: UIButton!
-    @IBOutlet weak var answerFalseButton: UIButton!
-    @IBOutlet weak var quizProgressBar: UIProgressView!
-
-
+struct QuizBrain {
     let quiz: [Question] = [
         Question(questionText: "A slug's blood is green.", correctAnswer: "True"),
         Question(questionText: "Approximately one quarter of human bones are in the feet.", correctAnswer: "True"),
@@ -31,41 +21,44 @@ class ViewController: UIViewController {
         Question(questionText: "Chocolate affects a dog's heart and nervous system; a few ounces are enough to kill a small dog.", correctAnswer: "True")
     ]
 
-    var questionNumber = 0
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-
-        updateUI()
+    func score() -> Int {
+        userScore
     }
 
-    var currentTimer : Timer?
+    func questionText() -> String {
+        quiz[questionNumber].questionText
+    }
 
-    @IBAction func answerButtonPressed(_ sender: UIButton) {
-        if currentTimer?.isValid ?? false {
-            NSLog("Do not press this button again")
-            currentTimer?.invalidate()
-            updateUI()
-            return
+    func progress() -> Float {
+        Float(questionNumber) / Float(quiz.count)
+    }
+
+    var questionNumber = 0
+    var userScore = 0
+
+    mutating func nextQuestion() {
+        questionNumber = (questionNumber + 1) % (quiz.endIndex)
+        if questionNumber == 0 {
+            reset()
+        }
+    }
+
+    mutating func checkAnswer(_ userAnswer: String) -> Bool {
+        let isCorrect = userAnswer == quiz[questionNumber].correctAnswer
+
+        if isCorrect {
+            increaseScore()
         }
 
-        let userAnswer = sender.currentTitle!
-        var question = quiz[questionNumber]
-        let isAnswerCorrect = question.checkAnswer(anAnswer: userAnswer)
-        NSLog("The answer is %@", isAnswerCorrect ? "correct" : "wrong")
-        sender.backgroundColor = isAnswerCorrect ? UIColor.green : UIColor.red
-        questionNumber = (questionNumber + 1) % (quiz.endIndex)
-        currentTimer = Timer.scheduledTimer(timeInterval: 0.15, target: self, selector: #selector(updateUI), userInfo: nil, repeats: false)
+        return isCorrect
     }
 
-    @objc private func updateUI() {
-        quizProgressBar.progress = Float(questionNumber) / Float(quiz.count)
-        questionTextLabel.text = quiz[questionNumber].questionText
-        answerFalseButton.backgroundColor = UIColor.clear
-        answerTrueButton.backgroundColor = UIColor.clear
-
+    mutating private func increaseScore() {
+        userScore += 1
     }
 
+    mutating func reset() {
+        questionNumber = 0
+        userScore = 0
+    }
 }
-

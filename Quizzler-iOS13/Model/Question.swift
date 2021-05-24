@@ -8,11 +8,6 @@ import Foundation
 struct Question {
     let questionText: String
     let correctAnswer: String
-    var userAnswer: Bool = false
     var aNumber: Int = 0
 
-    mutating func checkAnswer(anAnswer: String) -> Bool {
-        userAnswer = anAnswer == correctAnswer
-        return userAnswer
-    }
 }
